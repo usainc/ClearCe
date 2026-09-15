@@ -1,0 +1,44 @@
+node_modules/
+dist/
+src-tauri/target/
+*.local
+.qa/
+*.tsbuildinfo
+src-tauri/gen/
+
+# Local configuration / credentials (commit only deliberate templates)
+.env
+.env.*
+!.env.example
+*.pem
+*.pfx
+*.p12
+*.key
+
+# Local runtime, models, logs, databases and generated test output
+/engines/
+/models/
+*.bin
+*.onnx
+*.safetensors
+*.gguf
+*.log
+*.sqlite*
+*.db
+*.db-*
+/tmp/
+/temp/
+/test-results/
+/playwright-report/
+*.exe
+*.msi
+*.msix
+*.zip
+
+# Editor and OS artifacts
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
