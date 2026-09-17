@@ -2,26 +2,58 @@
 
 # ClearCe
 
-**Local AI Image Enhancer for Windows**
+**Local AI Image Enhancer for Windows**  
 by UsainCe.dev
 
-## Overview
+[![Release](https://img.shields.io/badge/release-v0.1.0-blue)](https://github.com/usainc/ClearCe/releases/tag/v0.1.0)
+![Windows](https://img.shields.io/badge/platform-Windows%20x64-0078D6)
+![Public Beta](https://img.shields.io/badge/status-Public%20Beta-orange)
 
-ClearCe is a native Windows desktop application for enhancing images with a local Real-ESRGAN NCNN Vulkan engine. Images stay on the computer during inference; there is no cloud processing or image upload in the enhancement pipeline.
+ClearCe is a native Windows desktop application for enhancing images locally with a Real-ESRGAN NCNN Vulkan engine. Images stay on your computer during inference; there is no cloud image upload in the enhancement pipeline.
 
-ClearCe 0.1.0 is a public beta for Windows x64. Its installer is currently unsigned.
+## Download
+
+**Latest public beta:** [ClearCe 0.1.0](https://github.com/usainc/ClearCe/releases/tag/v0.1.0)
+
+Download:
+
+`ClearCe_0.1.0_x64-setup.exe`
+
+Expected installer SHA-256:
+
+```text
+32c88d6dcce5f4d4774f9b7c59fa2f9222c05a3d594914b41d60947afe0ba116
+```
+
+> ClearCe 0.1.0 is currently distributed with an **unsigned Windows installer**. Windows SmartScreen may show a warning because this release does not yet have an Authenticode publisher signature. Download only from this repository and verify the SHA-256 if desired. Do **not** disable Windows Defender or SmartScreen for ClearCe.
+
+## Quick Installation
+
+1. Download `ClearCe_0.1.0_x64-setup.exe` from the [official GitHub Release](https://github.com/usainc/ClearCe/releases/tag/v0.1.0).
+2. Run the installer.
+3. Select **English** or **Türkçe**.
+4. Choose the installation directory and shortcut preferences.
+5. Launch ClearCe.
+6. Open **Models / Modeller**.
+7. Keep **Auto (Recommended) / Otomatik (Önerilen)** enabled.
+8. Select **Download Recommended / Önerileni İndir** to let ClearCe install the verified managed Real-ESRGAN package, or choose an existing compatible local engine.
+9. Open an image and start enhancing.
+
+The installed application does **not** require Node.js, Rust, Python or CUDA for normal use.
+
+For the complete bilingual walkthrough, troubleshooting and reinstall/uninstall behavior, see **[Installation Guide / Kurulum Rehberi](docs/INSTALLATION.md)**.
 
 ## Features
 
 - 2x, 4x, 8x and 12x enhancement
 - GPU/Vulkan processing on compatible NVIDIA, AMD and Intel hardware
+- Automatic GPU and model recommendation
+- One-click managed Real-ESRGAN installation with pinned-source and SHA-256 verification
+- Manual local engine support
 - Persistent batch queue with pause, cancel and retry controls
 - Before / After comparison of processed results
-- Automatic GPU and model recommendation
-- One-click managed Real-ESRGAN installation with SHA-256 verification
-- Manual local engine support
-- English and Türkçe interface
 - PNG, JPG and WebP input/output
+- English and Türkçe interface
 - Dark, Light, System, Midnight, Graphite and Forest themes
 
 ## Screenshots
@@ -37,41 +69,45 @@ ClearCe 0.1.0 is a public beta for Windows x64. Its installer is currently unsig
   </tr>
 </table>
 
-The Home screenshot uses a clearly labeled demonstration comparison. Processed files use the actual generated output in the comparison view.
+## First Launch & AI Engine
 
-## Installation
+**Real-ESRGAN is not bundled inside the ClearCe installer.**
 
-1. Download `ClearCe_0.1.0_x64-setup.exe` from the [official GitHub Release](https://github.com/usainc/ClearCe/releases/tag/v0.1.0).
-2. Run the installer.
-3. Select English or Türkçe.
-4. Launch ClearCe.
-5. Open **Models**.
-6. Choose the recommended managed AI engine installation, or select an existing compatible local engine.
-7. Open an image and start enhancing.
+When you open **Models**, ClearCe detects available Vulkan devices and shows a recommendation for your computer. If no managed engine is installed, you can explicitly select **Download Recommended**.
 
-The installed application does not require Node.js, Rust or Python.
+ClearCe then:
 
-ClearCe 0.1.0 is distributed with an **unsigned Windows installer**. Windows SmartScreen may display a warning because this release does not yet have an Authenticode publisher signature. Verify the installer hash below and download releases only from this repository.
+1. downloads only the pinned official Real-ESRGAN package allowed by its internal catalog;
+2. verifies the package SHA-256;
+3. validates the archive layout and expected files;
+4. extracts the approved runtime into a ClearCe-managed directory;
+5. performs engine/Vulkan health checks;
+6. activates the supported general or anime model when ready.
 
-## AI Engine Setup
+A failed managed install does not replace a previously working engine. After a healthy managed engine is installed, normal image inference runs locally and does not require internet access.
 
-**Real-ESRGAN is not bundled with ClearCe.**
+Advanced users can instead choose **Select Local AI Engine / Yerel AI Motorunu Seç** and provide an extracted compatible Real-ESRGAN NCNN Vulkan directory.
 
-After explicit user action, ClearCe can download a pinned official Real-ESRGAN NCNN Vulkan package. ClearCe verifies the package SHA-256 and expected archive layout before activation. It does not silently download an engine during installation or startup.
+More detail:
 
-Manual setup remains available for users who already have a compatible local engine. See [AI engine setup](docs/ENGINE_SETUP.md) and the [supported model catalog](docs/ENGINE_MODELS.md).
+- [Installation Guide / Kurulum Rehberi](docs/INSTALLATION.md)
+- [AI Engine Setup](docs/ENGINE_SETUP.md)
+- [Engine & Model Policy](docs/ENGINE_MODELS.md)
 
 ## Auto Model Recommendation
 
-The Models screen detects the local Vulkan devices and recommends a supported model/profile from the pinned ClearCe catalog. Recommendations are computed locally. The 0.1.0 catalog supports the general `realesrgan-x4plus` model and the anime/illustration `realesrgan-x4plus-anime` model.
+ClearCe 0.1.0 uses a deterministic recommendation system based on the detected Vulkan device and available resources.
 
-## Local Processing
+Current supported catalog:
 
-Normal image inference runs locally after a healthy engine is installed. Internet access is not required for normal inference. Network access is used only when the user explicitly starts the managed engine download.
+| Use | Model |
+| --- | --- |
+| General photo | `realesrgan-x4plus` |
+| Anime / illustration | `realesrgan-x4plus-anime` |
 
-Existing output files are preserved with a numeric suffix. EXIF orientation is applied and other metadata is removed in 0.1.0.
+If a recommended supported model is missing, ClearCe can offer the approved managed package. Unsupported or deferred specialist models are not presented as active features.
 
-## Supported Formats
+## Supported Formats & Limits
 
 - Input: JPG, PNG, WebP
 - Output: PNG, JPG, WebP
@@ -79,37 +115,57 @@ Existing output files are preserved with a numeric suffix. EXIF orientation is a
 - Maximum input resolution: 6 megapixels
 - Maximum final output: 96 megapixels
 
-The native model produces a 4x result. ClearCe downsamples that result for 2x; 8x and 12x use two 4x passes and downsample the intermediate result.
-
-## Languages
-
-- English
-- Türkçe
-
-The installer language seeds a fresh profile. The language can be changed immediately from Settings and is saved on the device.
+The native model produces a 4x result. ClearCe downsamples that result for 2x; 8x and 12x use two 4x passes and downsample the intermediate result. Higher scales require substantially more GPU memory, RAM, temporary disk space and processing time.
 
 ## Requirements
 
 - Windows x64
-- Microsoft WebView2 Runtime
-- Vulkan-compatible GPU and current driver
+- Microsoft Edge WebView2 Runtime
+- Vulkan-compatible GPU and current graphics driver
 - Compatible Real-ESRGAN NCNN Vulkan engine, installed through ClearCe or selected manually
 
 ClearCe is not NVIDIA-only. Compatible AMD and Intel Vulkan devices are supported, subject to their drivers and available resources.
 
-## Verification / SHA-256
+## Verify the Download
 
-The release includes `SHA256SUMS.txt` and `release-manifest.json`. Verify the downloaded installer in PowerShell:
+The GitHub Release includes `SHA256SUMS.txt` and `release-manifest.json`.
+
+PowerShell:
 
 ```powershell
 Get-FileHash .\ClearCe_0.1.0_x64-setup.exe -Algorithm SHA256
 ```
 
-Expected installer SHA-256:
+Expected:
 
 ```text
 32c88d6dcce5f4d4774f9b7c59fa2f9222c05a3d594914b41d60947afe0ba116
 ```
+
+## Reinstall / Uninstall
+
+Reinstalling the current ClearCe release preserves the existing user configuration where applicable, including settings, history and healthy engine configuration.
+
+Uninstall removes installer-owned application resources and shortcuts. ClearCe does not delete your source images or completed output images. In 0.1.0, application settings/history/engine data are preserved so a later reinstall can reuse them.
+
+## Troubleshooting
+
+**No compatible Vulkan device detected**  
+Install or update the GPU driver from NVIDIA, AMD or Intel's official source and restart ClearCe.
+
+**WebView2 is missing**  
+Install Microsoft Edge WebView2 Runtime from Microsoft's official WebView2 page, then run Setup again.
+
+**Managed engine download fails**  
+Check internet/proxy configuration and retry. The current working engine is left untouched on failure.
+
+**Engine is invalid or incomplete**  
+Use **Reinstall Managed Engine** or select a complete compatible local engine directory again.
+
+**8x/12x cannot run**  
+Try a smaller source image or a lower scale and ensure sufficient temporary disk space is available.
+
+For the full bilingual troubleshooting guide, see [docs/INSTALLATION.md](docs/INSTALLATION.md).
 
 ## Known Limitations
 
@@ -147,8 +203,15 @@ Real-ESRGAN, NCNN runtime files and model weights are obtained separately and re
 
 Dependency notices are preserved in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
+## Security & Feedback
+
+- Reproducible application bugs: [GitHub Issues](https://github.com/usainc/ClearCe/issues)
+- Security vulnerabilities: [Private vulnerability reporting](https://github.com/usainc/ClearCe/security/advisories/new)
+
+Do not upload private images, credentials or security-sensitive information to public issues.
+
 ## License
 
 **A project license has not been selected.** Public source availability does not grant permission to use, modify, redistribute or sublicense ClearCe source code or artwork. No MIT, Apache, GPL or other project license is implied.
 
-[Release notes](docs/RELEASE_0.1.0.md) · [Security](SECURITY.md) · [Feature status](docs/MVP_FEATURE_STATUS.md)
+[Download v0.1.0](https://github.com/usainc/ClearCe/releases/tag/v0.1.0) · [Installation Guide](docs/INSTALLATION.md) · [Release Notes](docs/RELEASE_0.1.0.md) · [Security](SECURITY.md) · [Feature Status](docs/MVP_FEATURE_STATUS.md)
