@@ -24,13 +24,16 @@ Normal image inference runs locally after the engine is installed. Internet acce
 
 1. Download `ClearCe_0.1.0_x64-setup.exe` from this release.
 2. Run the installer and select English or Türkçe.
-3. Launch ClearCe and open **Models**.
-4. Install the recommended managed engine or select an existing compatible local engine.
-5. Open an image and begin enhancing.
+3. Launch ClearCe and open **Models / Modeller**.
+4. Keep **Auto (Recommended) / Otomatik (Önerilen)** enabled.
+5. Install the recommended managed engine or select an existing compatible local engine.
+6. Open an image and begin enhancing.
+
+For a complete English/Türkçe walkthrough, SmartScreen guidance, AI-engine setup and troubleshooting, see the [Installation Guide / Kurulum Rehberi](INSTALLATION.md).
 
 ## Windows trust
 
-The ClearCe 0.1.0 installer is currently unsigned. Windows SmartScreen may show a warning because the release does not yet have an Authenticode publisher signature. Download only from the official ClearCe repository and verify the SHA-256 value.
+The ClearCe 0.1.0 installer is currently unsigned. Windows SmartScreen may show a warning because the release does not yet have an Authenticode publisher signature. Download only from the official ClearCe repository and verify the SHA-256 value. Do not disable Windows Defender or SmartScreen for ClearCe.
 
 ## Integrity
 
