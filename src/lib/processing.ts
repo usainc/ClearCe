@@ -12,6 +12,8 @@ export const requestSettings = (
   gpuIndex: null,
   gpuId: s.gpuId,
   tileSize: s.tileSize,
+  modelId: s.modelId,
+  engineMode: s.engineMode,
 });
 export interface QueueItem {
   id: string;
@@ -83,6 +85,8 @@ export interface Task {
     gpuIndex: number | null;
     gpuId: string | null;
     tileSize: number;
+    modelId: string;
+    engineMode: string;
   };
   createdAt: number;
   startedAt: number | null;
@@ -94,10 +98,18 @@ export interface Task {
   warning: string | null;
 }
 export interface EngineStatus {
-  devices: { id: string; index: number; name: string }[];
+  devices: {
+    id: string;
+    index: number;
+    name: string;
+    vendor: string;
+    deviceType: string;
+    dedicatedMemoryBytes: number | null;
+  }[];
   id: string;
   name: string;
   model: string;
+  models: string[];
   version: string | null;
   availability: string;
   message: string;

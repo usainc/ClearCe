@@ -6,7 +6,7 @@
 
 A Windows desktop utility for enhancing images on your own hardware. ClearCe combines local Real-ESRGAN processing, a persistent batch queue and real before/after comparison in a focused dark workspace. English and Türkçe are supported, with live switching and saved preferences.
 
-**Status:** Windows x64 MVP · version 0.1.0 · unsigned installer · AI engine installed separately.
+**Status:** Windows x64 0.1.0 release candidate · unsigned installer · managed or manual AI engine setup.
 
 ![ClearCe Windows workspace](docs/screenshots/home.png)
 
@@ -18,6 +18,7 @@ A Windows desktop utility for enhancing images on your own hardware. ClearCe com
 - Actual output comparison, bounded display previews, persistent history and output-folder actions.
 - English/Turkish, first-run Windows language detection and persisted preferences.
 - GPU selection, tile size, readiness checks and managed temporary-file cleanup.
+- Deterministic Auto GPU/model recommendation and one-click, SHA-256-verified managed Real-ESRGAN setup.
 
 [Screenshots](docs/SCREENSHOTS.md) · [Feature status](docs/MVP_FEATURE_STATUS.md)
 
@@ -27,7 +28,7 @@ Build the installer below, or use a maintainer-provided `ClearCe_0.1.0_x64-setup
 
 Requirements: **Windows x64**, Microsoft WebView2 and a compatible **Vulkan GPU/driver**. The unsigned installer may trigger a Windows warning. Installing WebView2 may need internet access if it is absent.
 
-**Real-ESRGAN and model weights are not bundled or automatically downloaded.** Obtain a trusted Windows NCNN Vulkan distribution, extract it, then choose **Models → Select Local AI Engine** (Türkçe: **Modeller → Yerel AI Motorunu Seç**).
+**Real-ESRGAN and model weights are not bundled in the installer.** In **Models**, Auto recommends a supported model and **Download Recommended / Önerileni İndir** installs the pinned official package after an explicit click. ClearCe verifies its SHA-256 and expected archive layout before activation. Advanced users can instead choose **Select Local AI Engine / Yerel AI Motorunu Seç**.
 
 ```text
 trusted-engine/
@@ -37,7 +38,7 @@ trusted-engine/
     realesrgan-x4plus.bin
 ```
 
-ClearCe checks files, executable launch and Vulkan readiness before publishing the managed installation. These checks do not authenticate a publisher: select only trusted software. Invalid imports preserve a working installation. If the engine disappears, History and Settings remain accessible; select a valid engine again. See [engine setup and troubleshooting](docs/ENGINE_SETUP.md).
+ClearCe checks files, executable launch and Vulkan readiness before publishing an installation. Managed and manual engines are stored separately; invalid downloads/imports preserve a working setup. If the engine disappears, History and Settings remain accessible. See [engine setup](docs/ENGINE_SETUP.md) and the [catalog/source policy](docs/ENGINE_MODELS.md).
 
 ## Enhance an image
 
@@ -67,21 +68,23 @@ npm run build
 cargo check --manifest-path src-tauri/Cargo.toml
 cargo test --manifest-path src-tauri/Cargo.toml
 npm run tauri build -- --debug --no-bundle
-npm run tauri build
+npm run release:windows
 ```
 
-Outputs: `src-tauri/target/debug/clearce.exe`, `src-tauri/target/release/clearce.exe`, and `src-tauri/target/release/bundle/nsis/ClearCe_0.1.0_x64-setup.exe`.
+Outputs: `src-tauri/target/debug/clearce.exe`, `src-tauri/target/release/clearce.exe`, and `src-tauri/target/release/bundle/nsis/ClearCe_0.1.0_x64-setup.exe`. The release wrapper finalizes Windows metadata, remaps source paths and creates SHA-256/signature reports. Python 3 is needed only on the build host.
+
+The native installer offers English/Türkçe, directory selection, shortcut options and a review page. Its language seeds a fresh app; saved choices survive updates. WebView2 must be installed separately; setup downloads no executables. The installed app accesses the network only after the user explicitly starts the approved engine download. Current local artifacts are an **UNSIGNED RELEASE CANDIDATE** and may trigger SmartScreen. See [installer behavior](docs/INSTALLER.md), [signing and Windows trust](docs/WINDOWS_TRUST.md), and [Phase 4.6 validation](docs/PHASE4_6.md). No release is published automatically.
 
 Real GPU tests are opt-in. Set `ENHANCECE_TEST_ENGINE_DIR` to a trusted managed runtime; see [engine setup](docs/ENGINE_SETUP.md). Legacy environment/storage identifiers intentionally remain compatible with earlier EnhanceCe installations; see [compatibility](docs/PHASE4_2.md).
 
 ## Limits and future work
 
-No specialist portrait, face, anime, text or restoration model; no independent AI preview-patch generation; no adjustable quality/denoise/sharpen backend; no metadata retention, overwrite or automatic updater. Video, cloud and non-Windows releases are outside this MVP. Specialist models and release signing remain future work, without dates or promises.
+The managed package supports general x4plus and anime/illustration 6B. Portrait, face, text and restoration specialist models remain unavailable; no independent AI preview-patch generation, adjustable quality/denoise/sharpen backend, metadata retention, overwrite or automatic updater. Video, cloud and non-Windows releases are outside this MVP. The release signing pipeline is prepared; a legitimate signing identity and its first signed-release qualification remain outstanding.
 
 ## License
 
 **Project license selection is pending.** Public source availability does not grant an open-source license. No MIT, Apache or other project license is implied. Approved ClearCe artwork is included as product branding; no separate reuse license is granted here.
 
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) preserves dependency notices. These do not establish redistribution rights for external engine/model packages, which are intentionally excluded.
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) preserves dependency notices. External engine/model files remain excluded from the installer; managed setup downloads the pinned upstream release directly after user action.
 
 [Release notes](docs/RELEASE_0.1.0.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)

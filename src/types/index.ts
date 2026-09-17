@@ -9,10 +9,18 @@ export const modes = [
 export type Mode = (typeof modes)[number];
 export type Scale = 2 | 4 | 8 | 12;
 export type Format = "PNG" | "JPG" | "WEBP";
+export const appearances = [
+  "Dark",
+  "Light",
+  "Midnight",
+  "Graphite",
+  "Forest",
+  "System",
+] as const;
 export interface Settings {
   gpuId: string | null;
   tileSize: number;
-  appearance: "Dark" | "Light" | "System";
+  appearance: (typeof appearances)[number];
   language: "en" | "tr";
   mode: Mode;
   scale: Scale;
@@ -25,6 +33,8 @@ export interface Settings {
   lowVram: boolean;
   previewQuality: "High Quality" | "Fast";
   privacyReminders: boolean;
+  engineMode: "Auto" | "Manual";
+  modelId: "auto" | "realesrgan-x4plus" | "realesrgan-x4plus-anime";
 }
 export interface ImageItem {
   path?: string;

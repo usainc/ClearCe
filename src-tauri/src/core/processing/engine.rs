@@ -38,6 +38,8 @@ pub struct EngineStatus {
     pub id: String,
     pub name: String,
     pub model: String,
+    #[serde(default)]
+    pub models: Vec<String>,
     pub version: Option<String>,
     pub availability: Availability,
     pub message: String,
@@ -54,6 +56,9 @@ pub struct EngineInput<'a> {
     pub input: &'a Path,
     pub output: &'a Path,
     pub gpu_index: Option<u32>,
+    pub model: &'a str,
+    pub engine_mode: &'a str,
+    pub category: &'a str,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -61,9 +66,18 @@ pub struct GpuDevice {
     pub id: String,
     pub index: u32,
     pub name: String,
+    #[serde(default)]
+    pub vendor: String,
+    #[serde(default)]
+    pub device_type: String,
+    #[serde(default)]
+    pub dedicated_memory_bytes: Option<u64>,
 }
 pub trait EnhancementEngine: Send + Sync {
     fn status(&self) -> EngineStatus;
+    fn status_mode(&self, _mode: &str) -> EngineStatus {
+        self.status()
+    }
     fn native_scale(&self) -> u32;
     fn process(&self, input: EngineInput<'_>, cancel: &Cancellation) -> Result<()>;
     fn cancel(&self, token: &Cancellation) {

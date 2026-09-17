@@ -1,10 +1,35 @@
 use ash::{vk, Entry};
 use std::ffi::CStr;
-pub fn devices() -> Vec<String> {
-    identities().into_iter().map(|(name, _)| name).collect()
+#[derive(Clone)]
+pub struct Identity {
+    pub name: String,
+    pub id: String,
+    pub vendor: String,
+    pub device_type: String,
+    pub dedicated_memory_bytes: Option<u64>,
 }
-pub fn identities() -> Vec<(String, String)> {
-    // Query the Vulkan loader itself. No VRAM estimates or assumed NCNN device indices.
+pub fn devices() -> Vec<String> {
+    identities().into_iter().map(|d| d.name).collect()
+}
+pub fn recommendation_devices() -> Vec<crate::core::processing::engine::GpuDevice> {
+    identities()
+        .into_iter()
+        .enumerate()
+        .map(
+            |(index, identity)| crate::core::processing::engine::GpuDevice {
+                id: identity.id,
+                index: index as u32,
+                name: identity.name,
+                vendor: identity.vendor,
+                device_type: identity.device_type,
+                dedicated_memory_bytes: identity.dedicated_memory_bytes,
+            },
+        )
+        .collect()
+}
+pub fn identities() -> Vec<Identity> {
+    // Query the Vulkan loader itself. Dedicated memory is reported only for a
+    // discrete device; shared iGPU heaps are intentionally not called VRAM.
     unsafe {
         let Ok(entry) = Entry::load() else {
             return vec![];
@@ -30,7 +55,36 @@ pub fn identities() -> Vec<(String, String)> {
                     .iter()
                     .map(|v| format!("{v:02x}"))
                     .collect::<String>();
-                Some((name, format!("{:x}:{:x}:{uuid}", p.vendor_id, p.device_id)))
+                let memory = instance.get_physical_device_memory_properties(device);
+                let dedicated_memory_bytes =
+                    (p.device_type == vk::PhysicalDeviceType::DISCRETE_GPU).then(|| {
+                        memory.memory_heaps[..memory.memory_heap_count as usize]
+                            .iter()
+                            .filter(|heap| heap.flags.contains(vk::MemoryHeapFlags::DEVICE_LOCAL))
+                            .map(|heap| heap.size)
+                            .sum::<u64>()
+                    });
+                let vendor = match p.vendor_id {
+                    0x10de => "NVIDIA",
+                    0x1002 | 0x1022 => "AMD",
+                    0x8086 => "Intel",
+                    _ => "Other",
+                }
+                .to_string();
+                let device_type = match p.device_type {
+                    vk::PhysicalDeviceType::DISCRETE_GPU => "discrete",
+                    vk::PhysicalDeviceType::INTEGRATED_GPU => "integrated",
+                    vk::PhysicalDeviceType::VIRTUAL_GPU => "virtual",
+                    _ => "other",
+                }
+                .to_string();
+                Some(Identity {
+                    name,
+                    id: format!("{:x}:{:x}:{uuid}", p.vendor_id, p.device_id),
+                    vendor,
+                    device_type,
+                    dedicated_memory_bytes,
+                })
             })
             .collect();
         instance.destroy_instance(None);
@@ -39,7 +93,7 @@ pub fn identities() -> Vec<(String, String)> {
 }
 pub fn map_ncnn(
     text: &str,
-    identities: &[(String, String)],
+    identities: &[Identity],
 ) -> Vec<crate::core::processing::engine::GpuDevice> {
     let mut devices = vec![];
     for line in text.lines().filter(|line| line.contains("queueC=")) {
@@ -55,16 +109,19 @@ pub fn map_ncnn(
         let Ok(index) = index.parse::<u32>() else {
             continue;
         };
-        let matches: Vec<_> = identities.iter().filter(|(n, _)| n == name).collect();
+        let matches: Vec<_> = identities.iter().filter(|d| d.name == name).collect();
         if matches.len() == 1
             && !devices
                 .iter()
                 .any(|d: &crate::core::processing::engine::GpuDevice| d.index == index)
         {
             devices.push(crate::core::processing::engine::GpuDevice {
-                id: matches[0].1.clone(),
+                id: matches[0].id.clone(),
                 index,
                 name: name.into(),
+                vendor: matches[0].vendor.clone(),
+                device_type: matches[0].device_type.clone(),
+                dedicated_memory_bytes: matches[0].dedicated_memory_bytes,
             });
         }
     }

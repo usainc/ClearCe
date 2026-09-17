@@ -19,3 +19,5 @@ Pop-Location
 ```
 
 If the public repository already exists, clone it for future public work instead of replaying these creation commands. Do not merge the original private phase history into it. No project license was selected; choose one explicitly before claiming an open-source release. Installer binaries can be attached separately only after release review; external AI engines are not included.
+
+For Phase 4.3 and later Windows packages, use `npm run release:windows`, `node scripts/check-release.mjs`, and the [release trust checklist](WINDOWS_TRUST.md). Include the generated `SHA256SUMS.txt` and `release-manifest.json` with the exact final artifacts. The unsigned test workflow does not publish to GitHub, Vercel or any hosting service.

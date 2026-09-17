@@ -1,6 +1,7 @@
 mod commands;
 pub mod core;
 pub mod engines;
+mod installer_language;
 pub mod services;
 pub mod storage;
 use services::batch_queue::BatchQueueService;
@@ -22,11 +23,15 @@ pub fn run() {
         )
         .setup(|app| {
             let data = app.path().app_local_data_dir()?;
-            let installed = data.join("engines/realesrgan");
+            let legacy = data.join("engines/realesrgan");
+            let managed = data.join("engines/managed/realesrgan");
+            let manual = data.join("engines/manual/realesrgan");
             let bundled = app.path().resource_dir()?.join("engines/realesrgan");
             #[allow(unused_mut)] // Mutable only for the debug-only engine override below.
             let mut locations = vec![
-                (installed.clone(), "installed".into()),
+                (managed.clone(), "managed".into()),
+                (manual, "manual".into()),
+                (legacy, "legacy".into()),
                 (bundled, "resource".into()),
             ];
             #[cfg(debug_assertions)]
@@ -35,7 +40,7 @@ pub fn run() {
             }
             let engine = Arc::new(engines::realesrgan::RealEsrgan {
                 locations,
-                install_dir: installed,
+                install_dir: managed,
             });
             let output = app.path().picture_dir()?.join("EnhanceCe");
             let processing = match ProcessingService::new(engine, data, output) {
@@ -60,6 +65,8 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            installer_language::installer_language,
+            installer_language::acknowledge_installer_language,
             commands::inspect_image,
             commands::engine_status,
             commands::start_enhancement,
@@ -78,7 +85,9 @@ pub fn run() {
             commands::system_locale,
             commands::validate_preferences,
             commands::processing_cache,
-            commands::install_local_engine
+            commands::install_local_engine,
+            commands::managed_engine_state,
+            commands::install_managed_engine
         ])
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {

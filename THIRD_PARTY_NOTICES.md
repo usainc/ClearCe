@@ -1,8 +1,10 @@
-# EnhanceCe third-party notices
+# ClearCe third-party notices
 
 This file reproduces license notices found in installed dependency source distributions. It includes build-time and platform-conditional dependencies; presence here does not imply every component is shipped.
 
-Real-ESRGAN / NCNN runtime and model: the user-provided runtime inspected for this release contained no license notices. No license or redistribution permission is inferred. Engine binaries and models are NOT bundled. Users explicitly import their own trusted distribution in Models. WebView2 is installed by the Microsoft bootstrapper if absent.
+Real-ESRGAN / NCNN runtime and models are NOT bundled in the ClearCe installer. Managed setup downloads one pinned official upstream release after explicit user action; manual setup imports a user-selected local distribution. Upstream licensing applies to those separately obtained files. WebView2 is a separately installed Microsoft prerequisite.
+
+Phase 4.5 direct Rust additions: `reqwest 0.12.28` (MIT OR Apache-2.0), `zip 2.4.2` (MIT), and `fs2 0.4.3` (MIT OR Apache-2.0). Their compiled transitive dependencies retain the upstream licenses recorded in `Cargo.lock` and source package metadata, including MIT, Apache-2.0, ISC, BSD-3-Clause, Zlib, BSL-1.0 and CDLA-Permissive-2.0 components.
 
 ## node_modules/react
 MIT License

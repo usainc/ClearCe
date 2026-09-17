@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "tauri": "tauri",
-    "test": "vitest run"
+    "test": "vitest run --exclude .qa/**",
+    "release:windows": "set \"PSModulePath=%USERPROFILE%\\Documents\\WindowsPowerShell\\Modules;%ProgramFiles%\\WindowsPowerShell\\Modules;%SystemRoot%\\system32\\WindowsPowerShell\\v1.0\\Modules\" && \"%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" -NoProfile -NonInteractive -File scripts/release.ps1",
+    "verify:release": "set \"PSModulePath=%USERPROFILE%\\Documents\\WindowsPowerShell\\Modules;%ProgramFiles%\\WindowsPowerShell\\Modules;%SystemRoot%\\system32\\WindowsPowerShell\\v1.0\\Modules\" && \"%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" -NoProfile -NonInteractive -File scripts/verify-release.ps1"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.0.0",
@@ -21,7 +23,7 @@
     "react-i18next": "^17.0.14"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2.0.0",
+    "@tauri-apps/cli": "2.11.4",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",

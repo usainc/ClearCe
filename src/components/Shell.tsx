@@ -18,6 +18,7 @@ import { useApp } from "../stores/AppContext";
 import { useProcessing } from "../stores/ProcessingContext";
 import { useQueue } from "../stores/QueueContext";
 import { Readiness } from "./Readiness";
+import { ThemeBrand } from "./ThemeBrand";
 import type { Page } from "../types";
 import { useEffect, type ReactNode } from "react";
 const nav = [
@@ -46,11 +47,7 @@ export function Shell({ children }: { children: ReactNode }) {
     <div className="app-shell">
       <div className="titlebar">
         <div className="titlebar-brand" data-tauri-drag-region>
-          <img
-            className="titlebar-logo"
-            src="/brand/clearce-symbol.png"
-            alt=""
-          />
+          <ThemeBrand className="titlebar-logo" symbol decorative />
           <span>ClearCe</span>
         </div>
         <div className="titlebar-drag" data-tauri-drag-region />
@@ -78,16 +75,8 @@ export function Shell({ children }: { children: ReactNode }) {
       </div>
       <aside className="sidebar">
         <div className="brand">
-          <img
-            className="brand-logo"
-            src="/brand/clearce-logo.png"
-            alt="ClearCe — Local AI Image Enhancer — by UsainCe.dev"
-          />
-          <img
-            className="brand-compact"
-            src="/brand/clearce-symbol.png"
-            alt="ClearCe"
-          />
+          <ThemeBrand className="brand-logo" />
+          <ThemeBrand className="brand-compact" symbol />
         </div>
         <nav aria-label={t("main_navigation")}>
           {nav.map(([Icon, label]) => (

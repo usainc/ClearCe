@@ -63,6 +63,9 @@ impl ProcessingService {
     pub fn status(&self) -> EngineStatus {
         self.engine.status()
     }
+    pub fn status_mode(&self, mode: &str) -> EngineStatus {
+        self.engine.status_mode(mode)
+    }
     pub fn cache(&self, clear: bool) -> Result<u64> {
         let active = self.active.lock().map_err(|_| err(ErrorCode::IoError))?;
         if clear && active.as_ref().is_some_and(|a| !a.task.status.terminal()) {
@@ -70,9 +73,14 @@ impl ProcessingService {
         }
         super::maintenance::cache(&self.temp_root, clear)
     }
-    pub fn health(&self, folder: Option<&str>, gpu: Option<&str>) -> super::maintenance::Health {
+    pub fn health(
+        &self,
+        folder: Option<&str>,
+        gpu: Option<&str>,
+        engine_mode: Option<&str>,
+    ) -> super::maintenance::Health {
         use super::maintenance::{Check, Health};
-        let status = self.status();
+        let status = self.status_mode(engine_mode.unwrap_or("Auto"));
         let available = matches!(
             status.availability,
             crate::core::processing::engine::Availability::Available
@@ -159,6 +167,18 @@ impl ProcessingService {
         }
         super::installation::install_verified(source, parent)
     }
+    pub fn install_managed_engine(
+        &self,
+        data: &std::path::Path,
+        source_url: &str,
+        progress: impl FnMut(super::managed_engine::InstallProgress),
+    ) -> Result<()> {
+        let active = self.active.lock().map_err(|_| err(ErrorCode::IoError))?;
+        if active.as_ref().is_some_and(|a| !a.task.status.terminal()) {
+            return Err(err(ErrorCode::Busy));
+        }
+        super::managed_engine::install(data, source_url, progress)
+    }
     pub fn start(self: &Arc<Self>, request: ProcessRequest, sink: TaskSink) -> Result<Task> {
         self.start_task(Task::queued(request), sink)
     }
@@ -227,7 +247,11 @@ impl ProcessingService {
         });
         let result = (|| {
             token.check()?;
-            let status = self.status();
+            let mut request = self
+                .active()?
+                .ok_or_else(|| err(ErrorCode::TaskNotFound))?
+                .request;
+            let status = self.status_mode(&request.engine_mode);
             use crate::core::processing::engine::Availability;
             match status.availability {
                 Availability::Available => {}
@@ -236,10 +260,6 @@ impl ProcessingService {
                 _ => return Err(err(ErrorCode::EngineInvalid)),
             }
             token.check()?;
-            let mut request = self
-                .active()?
-                .ok_or_else(|| err(ErrorCode::TaskNotFound))?
-                .request;
             let selected = if let Some(id) = &request.gpu_id {
                 let device = status
                     .devices
@@ -264,7 +284,20 @@ impl ProcessingService {
                 task.record(&format!("Selected GPU: {selected}"));
                 task.engine_id = status.id;
                 task.engine_version = status.version;
-                task.model = status.model;
+                task.model = if request.model_id == "auto" {
+                    if request.mode == "Anime / Illustration"
+                        && status
+                            .models
+                            .iter()
+                            .any(|m| m == crate::engines::realesrgan::discovery::MODEL_ANIME)
+                    {
+                        crate::engines::realesrgan::discovery::MODEL_ANIME.into()
+                    } else {
+                        crate::engines::realesrgan::discovery::MODEL.into()
+                    }
+                } else {
+                    request.model_id.clone()
+                };
             });
             let input = pipeline::inspect(std::path::Path::new(&request.input_path))?;
             let target = self.limits.estimate(

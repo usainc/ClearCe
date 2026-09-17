@@ -32,10 +32,15 @@ pub async fn engine_health(
     service: State<'_, Service>,
     output_dir: Option<String>,
     gpu_id: Option<String>,
+    engine_mode: Option<String>,
 ) -> Result<crate::services::maintenance::Health> {
     let service = service.inner().clone();
     tauri::async_runtime::spawn_blocking(move || {
-        service.health(output_dir.as_deref(), gpu_id.as_deref())
+        service.health(
+            output_dir.as_deref(),
+            gpu_id.as_deref(),
+            engine_mode.as_deref(),
+        )
     })
     .await
     .map_err(|_| err(ErrorCode::IoError))
@@ -80,9 +85,57 @@ pub async fn install_local_engine(
         .path()
         .app_local_data_dir()
         .map_err(|_| err(ErrorCode::IoError))?
-        .join("engines");
+        .join("engines")
+        .join("manual");
     tauri::async_runtime::spawn_blocking(move || {
         service.install_engine(Path::new(&source), &parent)
+    })
+    .await
+    .map_err(|_| err(ErrorCode::IoError))?
+}
+#[tauri::command]
+pub async fn managed_engine_state(
+    app: tauri::AppHandle,
+    service: State<'_, Service>,
+    category: String,
+    engine_mode: String,
+    model_id: String,
+) -> Result<crate::services::managed_engine::ManagedState> {
+    let data = app
+        .path()
+        .app_local_data_dir()
+        .map_err(|_| err(ErrorCode::IoError))?;
+    let mut status = service.status_mode(&engine_mode);
+    // Recommendation must work before an engine exists. NCNN-indexed devices
+    // remain authoritative for processing, while this direct Vulkan query is
+    // used only for the hardware summary and install recommendation.
+    if status.devices.is_empty() {
+        status.devices = crate::engines::realesrgan::gpu::recommendation_devices();
+    }
+    Ok(crate::services::managed_engine::state(
+        &data,
+        &status,
+        &category,
+        &engine_mode,
+        &model_id,
+    ))
+}
+#[tauri::command]
+pub async fn install_managed_engine(
+    app: tauri::AppHandle,
+    service: State<'_, Service>,
+    source_url: String,
+) -> Result<()> {
+    let data = app
+        .path()
+        .app_local_data_dir()
+        .map_err(|_| err(ErrorCode::IoError))?;
+    let service = service.inner().clone();
+    let events = app.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        service.install_managed_engine(&data, &source_url, move |progress| {
+            let _ = events.emit_to("main", "managed-engine-progress", progress);
+        })
     })
     .await
     .map_err(|_| err(ErrorCode::IoError))?

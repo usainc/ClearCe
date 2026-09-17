@@ -43,14 +43,14 @@ fn readiness_session_lock_and_startup_cleanup() {
     )
     .unwrap();
     assert!(!data.join("temp/job-stale").exists());
-    assert_eq!(service.health(None, None).state, "ready");
+    assert_eq!(service.health(None, None, None).state, "ready");
     assert_eq!(
-        service.health(None, Some("stale-device")).state,
+        service.health(None, Some("stale-device"), None).state,
         "requires attention"
     );
     assert_eq!(
         service
-            .health(root.path().join("missing").to_str(), None)
+            .health(root.path().join("missing").to_str(), None, None)
             .state,
         "requires attention"
     );
@@ -76,6 +76,7 @@ impl EnhancementEngine for Adapter {
             id: "test".into(),
             name: "Test".into(),
             model: "fixture".into(),
+            models: vec!["fixture".into()],
             version: None,
             availability: Availability::Available,
             message: String::new(),
@@ -126,6 +127,8 @@ fn request(path: &Path, output: &Path, scale: u32) -> ProcessRequest {
         gpu_index: None,
         gpu_id: None,
         tile_size: 32,
+        model_id: "auto".into(),
+        engine_mode: "Auto".into(),
     }
 }
 fn service(root: &Path, c: &Arc<Control>) -> Arc<ProcessingService> {

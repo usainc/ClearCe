@@ -29,6 +29,10 @@ pub enum ErrorCode {
     ContainmentUnavailable,
     TimedOut,
     StorageError,
+    NetworkUnavailable,
+    IntegrityMismatch,
+    ArchiveInvalid,
+    SourceNotAllowed,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -51,7 +55,7 @@ impl ProcessingError {
             ErrorCode::EngineInvalid => "The engine installation is incomplete or invalid. Reinstall the verified engine package.",
             ErrorCode::UnsupportedFormat => "Select a JPG, PNG, or WebP image and supported output format.",
             ErrorCode::UnsupportedScale => "Choose a supported scale: 2x, 4x, 8x or 12x.",
-            ErrorCode::UnsupportedMode => "This engine supports Photo mode only. Other modes arrive in a later phase.",
+            ErrorCode::UnsupportedMode => "This engine/model selection does not support the requested image mode.",
             ErrorCode::InvalidImage => "The image cannot be read or decoded. Select a valid local image.",
             ErrorCode::ImageTooLarge => "This image exceeds the Phase 2 limit of 100 MB or 6 million pixels.",
             ErrorCode::OutputNotWritable => "The output folder cannot be written to. Choose an existing writable folder.",
@@ -66,6 +70,10 @@ impl ProcessingError {
             ErrorCode::ContainmentUnavailable => "Windows process containment could not be established. Processing was not started.",
             ErrorCode::TimedOut => "The local engine exceeded its time limit and was stopped.",
             ErrorCode::StorageError => "The local job history could not be saved. Check available disk space.",
+            ErrorCode::NetworkUnavailable => "The approved engine package could not be downloaded. Check the internet connection and try again.",
+            ErrorCode::IntegrityMismatch => "The downloaded package did not match ClearCe's pinned SHA-256 and was rejected.",
+            ErrorCode::ArchiveInvalid => "The downloaded package is invalid or contains an unsafe file layout.",
+            ErrorCode::SourceNotAllowed => "The requested package source is not in ClearCe's approved source catalog.",
             ErrorCode::IoError => "A local file operation failed. Check the file and folder permissions.",
         };
         Self {

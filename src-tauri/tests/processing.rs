@@ -25,6 +25,7 @@ impl EnhancementEngine for Mock {
             id: "test-only".into(),
             name: "Test adapter".into(),
             model: "fixture".into(),
+            models: vec!["fixture".into()],
             version: None,
             availability: Availability::Available,
             message: String::new(),
@@ -69,6 +70,8 @@ fn request(path: &Path, output: &Path, scale: u32, format: OutputFormat) -> Proc
         gpu_index: None,
         gpu_id: None,
         tile_size: 128,
+        model_id: "auto".into(),
+        engine_mode: "Auto".into(),
     }
 }
 fn fixture(root: &Path) -> std::path::PathBuf {

@@ -25,6 +25,7 @@ export function Readiness({ details = false }: { details?: boolean }) {
       const result = await invoke<Health>("engine_health", {
         outputDir: savedSettings.outputFolder || null,
         gpuId: savedSettings.gpuId,
+        engineMode: savedSettings.engineMode,
       });
       setHealth(result);
       return result;
@@ -36,7 +37,11 @@ export function Readiness({ details = false }: { details?: boolean }) {
   }
   useEffect(() => {
     void verify();
-  }, [savedSettings.outputFolder, savedSettings.gpuId]);
+  }, [
+    savedSettings.outputFolder,
+    savedSettings.gpuId,
+    savedSettings.engineMode,
+  ]);
   async function install() {
     try {
       const source = await open({

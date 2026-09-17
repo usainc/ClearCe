@@ -1,4 +1,4 @@
-import { modes, type Settings } from "../types";
+import { appearances, modes, type Settings } from "../types";
 export const defaults: Settings = {
   gpuId: null,
   tileSize: 128,
@@ -15,13 +15,15 @@ export const defaults: Settings = {
   lowVram: false,
   previewQuality: "High Quality",
   privacyReminders: true,
+  engineMode: "Auto",
+  modelId: "auto",
 };
 export function validateSettings(value: unknown): Settings {
   if (!value || typeof value !== "object") return { ...defaults };
   const v = value as Record<string, unknown>;
   const out = { ...defaults };
   const choices = {
-    appearance: ["Dark", "Light", "System"],
+    appearance: appearances,
     language: ["en", "tr"],
     mode: modes,
     scale: [2, 4, 8, 12],
@@ -29,6 +31,8 @@ export function validateSettings(value: unknown): Settings {
     format: ["PNG", "JPG", "WEBP"],
     previewQuality: ["High Quality", "Fast"],
     tileSize: [0, 32, 64, 128, 256],
+    engineMode: ["Auto", "Manual"],
+    modelId: ["auto", "realesrgan-x4plus", "realesrgan-x4plus-anime"],
   };
   for (const [key, allowed] of Object.entries(choices))
     if ((allowed as readonly unknown[]).includes(v[key]))

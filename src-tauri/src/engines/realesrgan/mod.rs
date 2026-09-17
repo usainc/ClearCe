@@ -1,7 +1,7 @@
 #[cfg(windows)]
 mod containment;
 pub mod discovery;
-mod gpu;
+pub mod gpu;
 pub mod runner;
 use crate::core::processing::{
     engine::*,
@@ -12,7 +12,7 @@ pub struct RealEsrgan {
     pub locations: Vec<(PathBuf, String)>,
     pub install_dir: PathBuf,
 }
-pub fn arguments(input: &EngineInput<'_>, models: PathBuf) -> Vec<OsString> {
+pub fn arguments(input: &EngineInput<'_>, models: PathBuf, model: &str) -> Vec<OsString> {
     let mut args = vec![
         "-i".into(),
         input.input.as_os_str().into(),
@@ -21,7 +21,7 @@ pub fn arguments(input: &EngineInput<'_>, models: PathBuf) -> Vec<OsString> {
         "-m".into(),
         models.into_os_string(),
         "-n".into(),
-        discovery::MODEL.into(),
+        model.into(),
         "-s".into(),
         "4".into(),
         "-t".into(),
@@ -36,16 +36,54 @@ pub fn arguments(input: &EngineInput<'_>, models: PathBuf) -> Vec<OsString> {
     }
     args
 }
+impl RealEsrgan {
+    fn locations_for(&self, mode: &str) -> Vec<(PathBuf, String)> {
+        self.locations
+            .iter()
+            .filter(|(_, source)| match mode {
+                "Manual" => matches!(source.as_str(), "manual" | "legacy" | "resource"),
+                _ => true,
+            })
+            .cloned()
+            .collect()
+    }
+    fn model<'a>(
+        &self,
+        install: &discovery::Installation,
+        input: &'a EngineInput<'a>,
+    ) -> Result<&'a str> {
+        let requested = if input.model == "auto" {
+            if input.category == "Anime / Illustration"
+                && install.models.iter().any(|m| m == discovery::MODEL_ANIME)
+            {
+                discovery::MODEL_ANIME
+            } else {
+                discovery::MODEL
+            }
+        } else {
+            input.model
+        };
+        if install.models.iter().any(|model| model == requested) {
+            Ok(requested)
+        } else {
+            Err(err(ErrorCode::EngineInvalid))
+        }
+    }
+}
 impl EnhancementEngine for RealEsrgan {
     fn native_scale(&self) -> u32 {
         4
     }
     fn status(&self) -> EngineStatus {
+        self.status_mode("Auto")
+    }
+    fn status_mode(&self, mode: &str) -> EngineStatus {
         let mut status = EngineStatus {
             devices: vec![],
             id: "realesrgan-ncnn-vulkan".into(),
             name: "Real-ESRGAN NCNN Vulkan".into(),
             model: discovery::MODEL.into(),
+            models: vec![],
             version: None,
             availability: Availability::Missing,
             message: String::new(),
@@ -57,7 +95,7 @@ impl EnhancementEngine for RealEsrgan {
             gpu_devices: vec![],
             gpu_selection: "Automatic (NCNN default GPU)".into(),
         };
-        let install = match discovery::discover(&self.locations) {
+        let install = match discovery::discover(&self.locations_for(mode)) {
             Ok(v) => v,
             Err(e) => {
                 status.availability = if e.code == ErrorCode::EngineNotFound {
@@ -70,6 +108,7 @@ impl EnhancementEngine for RealEsrgan {
             }
         };
         status.location = Some(install.root.to_string_lossy().into());
+        status.models = install.models.clone();
         status.source = Some(install.source);
         status.version = install.version;
         match runner::run(
@@ -107,8 +146,12 @@ impl EnhancementEngine for RealEsrgan {
                     output: &probe.path().join("unused.png"),
                     gpu_index: None,
                     tile_size: 32,
+                    model: discovery::MODEL,
+                    engine_mode: "Auto",
+                    category: "Photo",
                 },
                 PathBuf::from("models"),
+                discovery::MODEL,
             );
             if let Ok(output) = runner::run(
                 &install.root.join(discovery::REQUIRED[0]),
@@ -131,13 +174,14 @@ impl EnhancementEngine for RealEsrgan {
         status
     }
     fn process(&self, input: EngineInput<'_>, cancel: &Cancellation) -> Result<()> {
-        let install = discovery::discover(&self.locations)?;
+        let install = discovery::discover(&self.locations_for(input.engine_mode))?;
+        let model = self.model(&install, &input)?;
         cancel.check()?;
         log::info!("event=engine_discovered engine=realesrgan-ncnn-vulkan");
         // This CLI misclassifies Windows verbatim (\\?\) model paths as relative.
         // The child cwd is the verified installation root, so a fixed relative
         // models directory resolves correctly without weakening discovery checks.
-        let args = arguments(&input, PathBuf::from("models"));
+        let args = arguments(&input, PathBuf::from("models"), model);
         let out = runner::run(
             &install.root.join(discovery::REQUIRED[0]),
             &install.root,
@@ -161,8 +205,12 @@ mod tests {
                 output: &output,
                 gpu_index: Some(0),
                 tile_size: 128,
+                model: discovery::MODEL,
+                engine_mode: "Auto",
+                category: "Photo",
             },
             PathBuf::from("E:/my models"),
+            discovery::MODEL,
         );
         assert_eq!(args[1], input.as_os_str());
         assert_eq!(args[3], output.as_os_str());

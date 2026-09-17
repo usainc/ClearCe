@@ -45,4 +45,18 @@ describe("persisted settings validation", () => {
       outputFolder: "C:\\Pictures",
     });
   });
+  it("persists safe auto/manual engine and model choices", () => {
+    expect(
+      validateSettings({
+        engineMode: "Manual",
+        modelId: "realesrgan-x4plus-anime",
+      }),
+    ).toMatchObject({
+      engineMode: "Manual",
+      modelId: "realesrgan-x4plus-anime",
+    });
+    expect(
+      validateSettings({ engineMode: "Remote", modelId: "random-url" }),
+    ).toMatchObject({ engineMode: "Auto", modelId: "auto" });
+  });
 });

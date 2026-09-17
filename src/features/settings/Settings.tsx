@@ -22,7 +22,7 @@ import {
 import { useApp } from "../../stores/AppContext";
 import { useProcessing } from "../../stores/ProcessingContext";
 import { defaults } from "../../lib/settings";
-import { modes, type Settings as AppSettings } from "../../types";
+import { appearances, modes, type Settings as AppSettings } from "../../types";
 import {
   Button,
   FolderField,
@@ -92,12 +92,12 @@ export function Settings() {
           title={t("appearance")}
           hint={t("choose_your_workspace_theme")}
         >
-          <Segmented
+          <div className="theme-options"><Segmented
             label={t("appearance")}
-            values={["Dark", "Light", "System"] as const}
+            values={appearances}
             value={draft.appearance}
             onChange={(v) => update("appearance", v)}
-          />
+          /></div>
         </SettingCard>
         <SettingCard
           icon={<Globe />}

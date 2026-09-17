@@ -8,6 +8,7 @@ use std::{
     path::{Path, PathBuf},
 };
 pub const MODEL: &str = "realesrgan-x4plus";
+pub const MODEL_ANIME: &str = "realesrgan-x4plus-anime";
 pub const REQUIRED: [&str; 3] = [
     "realesrgan-ncnn-vulkan.exe",
     "models/realesrgan-x4plus.param",
@@ -22,6 +23,7 @@ pub struct Installation {
     pub root: PathBuf,
     pub source: String,
     pub version: Option<String>,
+    pub models: Vec<String>,
 }
 pub fn discover(locations: &[(PathBuf, String)]) -> Result<Installation> {
     for (root, source) in locations {
@@ -52,7 +54,14 @@ pub fn discover(locations: &[(PathBuf, String)]) -> Result<Installation> {
             }
         }
         for (name, expected) in &manifest.files {
-            if !matches!(name.as_str(), "vcomp140.dll" | "vcomp140d.dll") {
+            if !matches!(
+                name.as_str(),
+                "vcomp140.dll"
+                    | "vcomp140d.dll"
+                    | "models/realesrgan-x4plus-anime.param"
+                    | "models/realesrgan-x4plus-anime.bin"
+                    | "package.json"
+            ) {
                 continue;
             }
             if hash(&root.join(name))? != *expected {
@@ -64,10 +73,20 @@ pub fn discover(locations: &[(PathBuf, String)]) -> Result<Installation> {
         if !param.starts_with("7767517") {
             return Err(err(ErrorCode::EngineInvalid));
         }
+        let anime_param = root.join("models/realesrgan-x4plus-anime.param");
+        let anime_bin = root.join("models/realesrgan-x4plus-anime.bin");
+        let mut models = vec![MODEL.into()];
+        if anime_param.is_file()
+            && anime_bin.is_file()
+            && std::fs::read_to_string(&anime_param).is_ok_and(|value| value.starts_with("7767517"))
+        {
+            models.push(MODEL_ANIME.into());
+        }
         return Ok(Installation {
             root,
             source: source.clone(),
             version: manifest.version,
+            models,
         });
     }
     Err(err(ErrorCode::EngineNotFound))

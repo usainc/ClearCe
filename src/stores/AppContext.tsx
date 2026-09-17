@@ -7,8 +7,14 @@ import {
   type ReactNode,
 } from "react";
 import { defaults } from "../lib/settings";
+import { updateThemeIcon } from "../lib/themeIcon";
 import { message } from "../lib/processing";
-import { readSettings, writeSettings, writeLanguage } from "../lib/persistence";
+import {
+  readSettings,
+  writeSettings,
+  writeLanguage,
+  writeEnginePreference,
+} from "../lib/persistence";
 import { changeLanguage, type Language } from "../i18n";
 import { samples, demoJobs } from "../lib/demo";
 import type { ImageItem, Job, Page, Settings } from "../types";
@@ -20,6 +26,10 @@ interface State {
   savedSettings: Settings;
   saveSettings: (s: Settings) => Promise<boolean>;
   saveLanguage: (language: Language) => Promise<void>;
+  saveEnginePreference: (
+    engineMode: Settings["engineMode"],
+    modelId: Settings["modelId"],
+  ) => Promise<boolean>;
   ready: boolean;
   images: ImageItem[];
   setImages: React.Dispatch<React.SetStateAction<ImageItem[]>>;
@@ -67,7 +77,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         settings.appearance === "Light" ||
         (settings.appearance === "System" && media.matches)
           ? "light"
-          : "dark";
+          : settings.appearance === "System"
+            ? "dark"
+            : settings.appearance.toLowerCase();
+      void updateThemeIcon(document.documentElement.dataset.theme);
     };
     apply();
     media.addEventListener("change", apply);
@@ -97,6 +110,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       notify(message(e));
     }
   }
+  async function saveEnginePreference(
+    engineMode: Settings["engineMode"],
+    modelId: Settings["modelId"],
+  ) {
+    try {
+      const safe = await writeEnginePreference(engineMode, modelId);
+      setSettings(safe);
+      setSavedSettings(safe);
+      notify(t("settings_saved_on_this_device"));
+      return true;
+    } catch (e) {
+      notify(message(e));
+      return false;
+    }
+  }
   return (
     <Context.Provider
       value={{
@@ -107,6 +135,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         savedSettings,
         saveSettings,
         saveLanguage,
+        saveEnginePreference,
         ready,
         images,
         setImages,

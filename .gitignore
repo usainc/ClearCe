@@ -14,6 +14,10 @@ src-tauri/gen/
 *.pfx
 *.p12
 *.key
+*.p7b
+*.jks
+*.keystore
+signing.local.json
 
 # Local runtime, models, logs, databases and generated test output
 /engines/

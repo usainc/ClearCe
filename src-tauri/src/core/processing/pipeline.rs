@@ -252,6 +252,9 @@ pub fn process_with_limits(
                         output: &intermediate,
                         gpu_index: request.gpu_index,
                         tile_size: request.tile_size,
+                        model: &request.model_id,
+                        engine_mode: &request.engine_mode,
+                        category: &request.mode,
                     },
                     cancel,
                 )

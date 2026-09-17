@@ -1,6 +1,10 @@
 # ClearCe local engine setup
 
-ClearCe requires a trusted Windows Real-ESRGAN NCNN Vulkan runtime and general `realesrgan-x4plus` weights. They are not bundled. Review upstream instructions and licensing before obtaining or redistributing a runtime; ClearCe does not certify a download source.
+ClearCe requires a Windows Real-ESRGAN NCNN Vulkan runtime. It is not bundled in the installer. The default Models experience can download one pinned official Real-ESRGAN 0.2.5.0 package after an explicit click, verify its SHA-256 and activate its general/anime models. See [ENGINE_MODELS.md](ENGINE_MODELS.md) for the exact source policy and decision rules.
+
+Choose **Download Recommended / Önerileni İndir** for managed setup. Progress covers download, integrity verification, extraction, validation and activation. A failure leaves the current managed and manual engines untouched.
+
+## Manual option
 
 In **Models / Modeller**, choose **Select Local AI Engine / Yerel AI Motorunu Seç**. Select the extracted folder containing `realesrgan-ncnn-vulkan.exe`, `models/realesrgan-x4plus.param` and `models/realesrgan-x4plus.bin`.
 
@@ -8,7 +12,7 @@ Available required runtime DLLs are copied with the fixed files. Import checks c
 
 | State | Next step |
 | --- | --- |
-| Missing | Select an extracted trusted runtime; app installation does not install AI weights. |
+| Missing | Download the recommended managed runtime, or select an extracted trusted runtime manually. |
 | Invalid | Check all required files and select again. Invalid imports preserve the working copy. |
 | No Vulkan device | Check/install your GPU manufacturer's compatible driver. |
 | Stale GPU | Select Auto or a detected device in Settings. |
@@ -19,7 +23,7 @@ Available required runtime DLLs are copied with the fixed files. Import checks c
 
 ## Existing installations
 
-Technical identifier: `dev.usaince.enhancece`. Engine: `%LOCALAPPDATA%\dev.usaince.enhancece\engines\realesrgan`. Settings: `%APPDATA%\dev.usaince.enhancece`, key `enhancece.settings.v1`. The legacy Pictures/EnhanceCe default output directory remains intentional. Custom saved paths are unchanged.
+Technical identifier: `dev.usaince.enhancece`. Managed engine: `%LOCALAPPDATA%\dev.usaince.enhancece\engines\managed\realesrgan`. Manual engine: `engines\manual\realesrgan`. The previous `engines\realesrgan` location remains compatible. Settings: `%APPDATA%\dev.usaince.enhancece`, key `enhancece.settings.v1`. The legacy Pictures/EnhanceCe default output directory remains intentional. Custom saved paths are unchanged.
 
 Both app names share the exclusive session lock. Close EnhanceCe before opening ClearCe. Installer names differ, so an old shortcut may remain until the previous app is uninstalled. Do not remove application data when retiring it.
 

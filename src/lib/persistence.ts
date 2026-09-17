@@ -15,6 +15,24 @@ export async function readSettings(): Promise<Settings> {
     value && typeof value === "object" && "language" in value
       ? value.language
       : undefined;
+  // Read once, persist through the existing store, then acknowledge. A failed
+  // save retains the handoff for the next launch. Saved user choices always win.
+  if (isTauri()) {
+    const seed = await invoke<unknown>("installer_language").catch(() => null);
+    if (
+      explicit !== "en" &&
+      explicit !== "tr" &&
+      (seed === "en" || seed === "tr")
+    ) {
+      safe.language = seed;
+      const store = await nativeStore();
+      await store.set(key, safe);
+      await store.save();
+      await invoke("acknowledge_installer_language").catch(() => undefined);
+      return safe;
+    }
+    await invoke("acknowledge_installer_language").catch(() => undefined);
+  }
   const system =
     explicit === "en" || explicit === "tr"
       ? "en"
@@ -31,6 +49,22 @@ export async function writeLanguage(language: Language) {
     await store.set(key, safe);
     await store.save();
   } else localStorage.setItem(key, JSON.stringify(safe));
+}
+export async function writeEnginePreference(
+  engineMode: Settings["engineMode"],
+  modelId: Settings["modelId"],
+) {
+  const safe = validateSettings({
+    ...(await readSettings()),
+    engineMode,
+    modelId,
+  });
+  if (isTauri()) {
+    const store = await nativeStore();
+    await store.set(key, safe);
+    await store.save();
+  } else localStorage.setItem(key, JSON.stringify(safe));
+  return safe;
 }
 export async function writeSettings(settings: Settings) {
   const safe = validateSettings(settings);

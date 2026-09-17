@@ -66,14 +66,33 @@ pub struct ProcessRequest {
     pub gpu_id: Option<String>,
     #[serde(default)]
     pub tile_size: u32,
+    #[serde(default = "default_model")]
+    pub model_id: String,
+    #[serde(default = "default_engine_mode")]
+    pub engine_mode: String,
+}
+fn default_model() -> String {
+    "auto".into()
+}
+fn default_engine_mode() -> String {
+    "Auto".into()
 }
 impl ProcessRequest {
     pub fn validate(&self) -> Result<()> {
         if ![2, 4, 8, 12].contains(&self.scale) {
             return Err(err(ErrorCode::UnsupportedScale));
         }
-        if self.mode != "Photo" {
+        if !matches!(self.mode.as_str(), "Photo" | "Anime / Illustration") {
             return Err(err(ErrorCode::UnsupportedMode));
+        }
+        if !matches!(
+            self.model_id.as_str(),
+            "auto" | "realesrgan-x4plus" | "realesrgan-x4plus-anime"
+        ) {
+            return Err(err(ErrorCode::UnsupportedMode));
+        }
+        if !matches!(self.engine_mode.as_str(), "Auto" | "Manual") {
+            return Err(err(ErrorCode::EngineInvalid));
         }
         if self.gpu_index.is_some_and(|v| v > 31) {
             return Err(err(ErrorCode::InvalidGpuSelection));
@@ -249,6 +268,8 @@ mod tests {
             gpu_index: None,
             gpu_id: None,
             tile_size: 0,
+            model_id: "auto".into(),
+            engine_mode: "Auto".into(),
         };
         assert_eq!(r.validate().unwrap_err().code, ErrorCode::UnsupportedScale);
         r.scale = 2;
