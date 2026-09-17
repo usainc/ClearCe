@@ -20,12 +20,15 @@ docs/PHASE4_2.md
 docs/PHASE4_3.md
 docs/PHASE4_5.md
 docs/PHASE4_6.md
+docs/PHASE4_7.md
 docs/PUBLISHING.md
 docs/RELEASE_0.1.0.md
 docs/SCREENSHOTS.md
 docs/THEMES.md
 docs/WINDOWS_TRUST.md
+docs/screenshots/batch.png
 docs/screenshots/home.png
+docs/screenshots/models-managed.png
 docs/screenshots/settings-tr.png
 index.html
 package-lock.json

@@ -1,27 +1,60 @@
-# ClearCe 0.1.0 Release Candidate — Windows x64
+# ClearCe 0.1.0 — Public Beta
 
-ClearCe Windows MVP release candidate with the localized per-user NSIS wizard and Phase 4.5 managed-engine workflow. This remains an **UNSIGNED RELEASE CANDIDATE**; this phase does not upload or publish it.
+ClearCe 0.1.0 is the first public beta of the local AI image enhancement desktop application for Windows.
 
-Installer: `src-tauri/target/release/bundle/nsis/ClearCe_0.1.0_x64-setup.exe`.
+## Highlights
 
-## English
+- Local GPU-powered AI image enhancement
+- 2x, 4x, 8x and 12x output
+- Batch processing
+- Before / After comparison
+- Automatic GPU/model recommendation
+- One-click managed Real-ESRGAN setup
+- Manual local engine support
+- English and Turkish UI
+- Six saved workspace themes
 
-ClearCe processes images locally using a trusted Real-ESRGAN NCNN Vulkan engine. English and Turkish are available; a fresh installation uses the installer language, otherwise Windows language is the fallback. An existing saved choice always wins. Switch languages immediately in Settings.
+## AI engine
 
-The AI engine is not included in the installer. Auto recommends a model from the detected GPU/Vulkan profile. Open Models and choose **Download Recommended** to fetch the pinned official package, verify its SHA-256 and activate its general/anime models. Advanced users can still choose **Select Local AI Engine**. Managed and manual installs are separate; invalid attempts preserve the working setup.
+Real-ESRGAN is not bundled with the installer. After explicit user action, ClearCe can download a pinned official Real-ESRGAN NCNN Vulkan package and verifies its SHA-256 plus expected archive layout before activation. Manual local engine configuration remains supported.
 
-Import an image, select 2x/4x/8x/12x and an output folder, then enhance. 8x/12x use multiple AI passes and require more resources. Existing output files are kept; EXIF metadata is removed. Batch processing and recorded-result comparison are available.
+Normal image inference runs locally after the engine is installed. Internet access is not required for normal inference.
 
-## Türkçe
+## Installation
 
-ClearCe, güvenilir bir Real-ESRGAN NCNN Vulkan motoruyla görselleri bilgisayarınızda işler. İngilizce ve Türkçe desteklenir. Yeni kurulumda kurulum dili kullanılır; kayıtlı dil tercihiniz varsa korunur. Kurulum dili aktarılmamışsa Windows dili kullanılır. Dili Ayarlar üzerinden anında değiştirebilirsiniz.
+1. Download `ClearCe_0.1.0_x64-setup.exe` from this release.
+2. Run the installer and select English or Türkçe.
+3. Launch ClearCe and open **Models**.
+4. Install the recommended managed engine or select an existing compatible local engine.
+5. Open an image and begin enhancing.
 
-AI motoru kurulum paketine dahil değildir. Auto, algılanan GPU/Vulkan profiline göre model önerir. Modeller ekranındaki **Önerileni İndir** düğmesi sabitlenmiş resmî paketi indirir, SHA-256 değerini doğrular ve genel/anime modellerini etkinleştirir. İleri düzey kullanıcılar **Yerel AI Motorunu Seç** seçeneğini kullanabilir. Yönetilen ve manuel kurulumlar ayrıdır; geçersiz denemeler çalışan kurulumu bozmaz.
+## Windows trust
 
-Bir görsel açın, 2x/4x/8x/12x ölçeğini ve çıktı klasörünü seçip iyileştirmeyi başlatın. 8x/12x birden fazla AI geçişi kullanır ve daha fazla kaynak gerektirir. Var olan dosyaların üzerine yazılmaz; EXIF bilgileri kaldırılır. Toplu işlem ve gerçek sonuç karşılaştırması kullanılabilir.
+The ClearCe 0.1.0 installer is currently unsigned. Windows SmartScreen may show a warning because the release does not yet have an Authenticode publisher signature. Download only from the official ClearCe repository and verify the SHA-256 value.
 
-## Requirements and limits
+## Integrity
 
-Windows x64, preinstalled WebView2 and a compatible Vulkan driver. No engine is bundled; internet is needed only for the optional managed-engine download after explicit user action. Image processing itself remains local and works offline after a healthy engine is installed. The installer is not digitally signed, so SmartScreen may warn. No auto updater, portrait/text/restoration specialist models, metadata preservation, overwrite, cloud service or video support. See [Phase 4.5](PHASE4_5.md), [Windows trust](WINDOWS_TRUST.md) and `MVP_FEATURE_STATUS.md` for precise validation and limitations.
+This release includes:
 
-Release integrity files are generated under `src-tauri/target/release/release-integrity/`. The published SHA-256 values must match the exact final executable and installer. Publish the matching manifest/hashes together with a reviewed installer on the official GitHub Releases channel; never label an unsigned artifact as signed.
+- `ClearCe_0.1.0_x64-setup.exe`
+- `SHA256SUMS.txt`
+- `release-manifest.json`
+
+Expected installer SHA-256:
+
+```text
+32c88d6dcce5f4d4774f9b7c59fa2f9222c05a3d594914b41d60947afe0ba116
+```
+
+The manifest records `signed: false` and `engineBundled: false`.
+
+## Known limitations
+
+- Unsigned installer
+- No dedicated Face Restore model yet
+- No automatic updater
+- Metadata preservation is deferred
+- Windows x64 only
+- High scale factors require substantially more memory, storage and processing time
+
+This is a public beta. Please use [GitHub Issues](https://github.com/usainc/ClearCe/issues) for reproducible bugs that do not contain private images, credentials or security details. Report vulnerabilities through [private vulnerability reporting](https://github.com/usainc/ClearCe/security/advisories/new).
