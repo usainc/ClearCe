@@ -9,6 +9,7 @@ THIRD_PARTY_NOTICES.md
 docs/ENGINE_SETUP.md
 docs/ENGINE_MODELS.md
 docs/FILES.txt
+docs/INSTALLATION.md
 docs/INSTALLER.md
 docs/MVP_FEATURE_STATUS.md
 docs/PHASE1.md
